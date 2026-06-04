@@ -274,9 +274,9 @@ function doSearch() {
 
   const matches = ACCOUNTS.filter(a => {
     if (!a.accountNumber.includes(q) && !a.accountName.toLowerCase().includes(q)) return false;
-    const bill    = a.months.reduce((s, m) => s + (m.total || m.basicAmt), 0);
-    const paid    = getTotalPaid(a.accountNumber);
-    return (bill - paid) > 0.01; // hide fully paid accounts
+    const bill  = a.months.reduce((s, m) => s + (m.total || m.basicAmt) + (m.installment || 0), 0);
+    const paid  = getTotalPaid(a.accountNumber);
+    return (bill - paid) > 0.01;
   });
 
   if (!matches.length) {
@@ -284,9 +284,11 @@ function doSearch() {
   }
 
   el.innerHTML = matches.slice(0, 20).map(a => {
-    const bill    = a.months.reduce((s, m) => s + (m.total || m.basicAmt), 0);
-    const paid    = getTotalPaid(a.accountNumber);
-    const balance = Math.max(0, bill - paid);
+    const waterBill2 = a.months.reduce((s, m) => s + (m.total || m.basicAmt), 0);
+    const instValue2 = a.months.reduce((v, m) => v || (m.installment || 0), 0);
+    const bill       = waterBill2;
+    const paid       = getTotalPaid(a.accountNumber);
+    const balance    = Math.max(0, bill + instValue2 - paid);
     return `
     <div class="result-item" onclick="openModal('${a.accountNumber}')">
       <div>
@@ -314,43 +316,80 @@ function openModal(acctNum) {
   document.getElementById('modal-brgy').textContent = brgyName(a.barangayCode);
   document.getElementById('modal-purk').textContent = a.purk;
   renderModalTable();
-  document.getElementById('modal-overlay').classList.add('active');
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
 
 function renderModalTable() {
   const a         = accountMap[currentAcctNum]; if (!a) return;
   const totalPaid = getTotalPaid(currentAcctNum);
-  const totalBill = a.months.reduce((s, m) => s + (m.total || m.basicAmt), 0);
-  const balance   = Math.max(0, totalBill - totalPaid);
-  const rows       = calcMonthBalances(a.months, totalPaid);
-  const visibleRows = rows.filter(m => m.status !== 'Paid'); // collector: hide fully paid months
+  const rows      = calcMonthBalances(a.months, totalPaid);
+  const unpaidRows = rows.filter(m => m.status !== 'Paid');
 
-  document.getElementById('modal-grand').textContent   = '₱' + fmt(totalBill);
-  document.getElementById('modal-balance').textContent = '₱' + fmt(balance);
+  // Render table rows with checkbox per row — preserve checked state
+  const prevChecked = new Set(
+    [...document.querySelectorAll('#modal-table-body input[type=checkbox]:checked')].map(cb => cb.value)
+  );
 
-  document.getElementById('modal-table-body').innerHTML = visibleRows.map(m => {
-    const inst = m.installment ? `<span class="badge-inst">+₱${fmt(m.installment)} inst.</span>` : '';
+  document.getElementById('modal-table-body').innerHTML = unpaidRows.map(m => {
+    const checked = prevChecked.size === 0 || prevChecked.has(m.month) ? '' : '';
+    // On first render prevChecked is empty so no checkboxes pre-checked
+    const isChecked = prevChecked.has(m.month) ? 'checked' : '';
     return `<tr>
+      <td style="width:36px;text-align:center">
+        <input type="checkbox" value="${escHtml(m.month)}" ${isChecked} onchange="updateModalTotals()" style="width:18px;height:18px;cursor:pointer;accent-color:#1a56db">
+      </td>
       <td><strong>${escHtml(m.month)}</strong></td>
       <td>${m.reading}</td>
       <td>₱${fmt(m.basicAmt)}</td>
       <td>₱${fmt(m.envFee)}</td>
-      <td>₱${fmt(m.total)}${inst}</td>
-      <td>₱${fmt(m.remaining)}</td>
+      <td>₱${fmt(m.total || m.basicAmt)}</td>
     </tr>`;
   }).join('');
 
-  const gB = visibleRows.reduce((s, m) => s + m.basicAmt,   0);
-  const gE = visibleRows.reduce((s, m) => s + m.envFee,     0);
-  const gT = visibleRows.reduce((s, m) => s + m.total,      0);
-  const gR = visibleRows.reduce((s, m) => s + m.remaining,  0);
+  updateModalTotals();
+}
+
+function updateModalTotals() {
+  const a = accountMap[currentAcctNum]; if (!a) return;
+  const totalPaid = getTotalPaid(currentAcctNum);
+  const rows      = calcMonthBalances(a.months, totalPaid);
+  const unpaidRows = rows.filter(m => m.status !== 'Paid');
+
+  const checked = new Set(
+    [...document.querySelectorAll('#modal-table-body input[type=checkbox]:checked')].map(cb => cb.value)
+  );
+  const activeRows = checked.size > 0
+    ? unpaidRows.filter(m => checked.has(m.month))
+    : unpaidRows;
+
+  const waterBill = activeRows.reduce((s, m) => s + (m.total || m.basicAmt), 0);
+  const instValue = activeRows.reduce((v, m) => v || (m.installment || 0), 0);
+  const totalBill = waterBill;
+
+  document.getElementById('modal-grand').textContent   = '₱' + fmt(totalBill);
+  document.getElementById('modal-balance').textContent = '₱' + fmt(Math.max(0, totalBill + instValue - totalPaid));
+
+  const instMeta = document.getElementById('modal-inst-wrap');
+  if (instValue > 0) {
+    document.getElementById('modal-inst').textContent = '+₱' + fmt(instValue);
+    instMeta.style.display = '';
+  } else {
+    instMeta.style.display = 'none';
+  }
+
+  const gB = activeRows.reduce((s, m) => s + m.basicAmt, 0);
+  const gE = activeRows.reduce((s, m) => s + m.envFee, 0);
+  const gT = activeRows.reduce((s, m) => s + (m.total || m.basicAmt), 0);
+  const label = checked.size > 0 ? `TOTAL (${activeRows.length})` : `TOTAL (${activeRows.length})`;
   document.getElementById('modal-table-foot').innerHTML =
-    `<tr><td>TOTAL (${visibleRows.length})</td><td>—</td><td>₱${fmt(gB)}</td><td>₱${fmt(gE)}</td><td>₱${fmt(gT)}</td><td>₱${fmt(gR)}</td></tr>`;
+    `<tr><td></td><td>${label}</td><td>—</td><td>₱${fmt(gB)}</td><td>₱${fmt(gE)}</td><td>₱${fmt(gT)}</td></tr>`;
 }
 
 function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
-function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('active'); document.body.style.overflow = ''; }
+function closeModalDirect() { document.getElementById('modal-overlay').style.display = 'none'; document.body.style.overflow = ''; }
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModalDirect(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
 
 function showStatus(msg, type, duration) {
