@@ -327,7 +327,6 @@ function renderModalTable() {
   const visibleRows = rows.filter(m => m.status !== 'Paid'); // collector: hide fully paid months
 
   document.getElementById('modal-grand').textContent   = '₱' + fmt(totalBill);
-  document.getElementById('modal-paid').textContent    = '₱' + fmt(totalPaid);
   document.getElementById('modal-balance').textContent = '₱' + fmt(balance);
 
   document.getElementById('modal-table-body').innerHTML = visibleRows.map(m => {
@@ -338,7 +337,6 @@ function renderModalTable() {
       <td>₱${fmt(m.basicAmt)}</td>
       <td>₱${fmt(m.envFee)}</td>
       <td>₱${fmt(m.total)}${inst}</td>
-      <td>₱${fmt(m.paid)}</td>
       <td>₱${fmt(m.remaining)}</td>
     </tr>`;
   }).join('');
@@ -346,10 +344,9 @@ function renderModalTable() {
   const gB = visibleRows.reduce((s, m) => s + m.basicAmt,   0);
   const gE = visibleRows.reduce((s, m) => s + m.envFee,     0);
   const gT = visibleRows.reduce((s, m) => s + m.total,      0);
-  const gP = visibleRows.reduce((s, m) => s + m.paid,       0);
   const gR = visibleRows.reduce((s, m) => s + m.remaining,  0);
   document.getElementById('modal-table-foot').innerHTML =
-    `<tr><td>TOTAL (${visibleRows.length})</td><td>—</td><td>₱${fmt(gB)}</td><td>₱${fmt(gE)}</td><td>₱${fmt(gT)}</td><td>₱${fmt(gP)}</td><td>₱${fmt(gR)}</td></tr>`;
+    `<tr><td>TOTAL (${visibleRows.length})</td><td>—</td><td>₱${fmt(gB)}</td><td>₱${fmt(gE)}</td><td>₱${fmt(gT)}</td><td>₱${fmt(gR)}</td></tr>`;
 }
 
 function closeModal(e) { if (e.target === document.getElementById('modal-overlay')) closeModalDirect(); }
