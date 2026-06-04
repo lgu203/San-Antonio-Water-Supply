@@ -450,7 +450,7 @@ function rpPopulateYears() {
   if (!sel) return;
   sel.innerHTML = '';
   const now = new Date();
-  for (let y = now.getFullYear() + 3; y >= now.getFullYear() - 5; y--) {
+  for (let y = now.getFullYear() + 10; y >= 2015; y--) {
     const opt = document.createElement('option');
     opt.value = y; opt.textContent = y;
     if (y === now.getFullYear()) opt.selected = true;
@@ -487,7 +487,7 @@ function openReadingModal() {
   document.getElementById('rdg-modal-acct-badge').textContent = 'Acct # ' + a.accountNumber;
   document.getElementById('rdg-modal-acct-name').textContent  = titleCase(a.accountName);
   document.getElementById('rdg-modal-acct-meta').textContent  =
-    brgyName(a.barangayCode) + ', Purok ' + a.purk + ' · Type: ' + a.acctType;
+    brgyName(a.barangayCode) + ', Purok ' + a.purk + (a.acctType ? ' · Type: ' + a.acctType : '');
 
   const lastM       = a.months[0];
   const lastReading = lastM ? lastM.reading : 0;
@@ -530,12 +530,6 @@ function _closeReadingModal() {
 }
 
 // ── CLEAR / RESET FORM ───────────────────────────────────────────
-function rpClearSearch() {
-  rpSelectedAcct = null;
-  document.getElementById('rp-history').style.display = 'none';
-  rpResetForm();
-}
-
 function rpNextMonthLabel(lastMonthStr) {
   // Try to parse "MMM YYYY" → add 1 month
   if (!lastMonthStr || lastMonthStr === 'N/A') {
