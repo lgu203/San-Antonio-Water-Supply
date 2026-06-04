@@ -450,7 +450,7 @@ function rpPopulateYears() {
   if (!sel) return;
   sel.innerHTML = '';
   const now = new Date();
-  for (let y = now.getFullYear() + 1; y >= now.getFullYear() - 3; y--) {
+  for (let y = now.getFullYear() + 3; y >= now.getFullYear() - 5; y--) {
     const opt = document.createElement('option');
     opt.value = y; opt.textContent = y;
     if (y === now.getFullYear()) opt.selected = true;
