@@ -6,8 +6,8 @@
 <title>San Antonio Water Supply — Admin</title>
 <link rel="stylesheet" href="account.css">
 <style>
-  .header-title p { color: rgba(255,255,255,.7); font-size: 11px; margin-top: 1px; }
-  .admin-badge { background: #f59e0b; color: #1a202c; font-size: 10px; font-weight: 800;
+  .header-title p { color: rgba(255,255,255,.7); font-size: 15px; margin-top: 2px; }
+  .admin-badge { background: #f59e0b; color: #1a202c; font-size: 13px; font-weight: 800;
     padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; letter-spacing: .5px; }
 
   .modal-action-btn {
@@ -252,13 +252,13 @@
         <div class="rp-field">
           <label>Month</label>
           <div style="display:flex;gap:6px">
-            <select Npx;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()">
+            <select id="rp-month-m" style="padding:10px;border:2px solid #86efac;border-radius:8px;font-size:16px;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()">
               <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option>
               <option value="Apr">April</option><option value="May">May</option><option value="Jun">June</option>
               <option value="Jul">July</option><option value="Aug">August</option><option value="Sep">September</option>
               <option value="Oct">October</option><option value="Nov">November</option><option value="Dec">December</option>
             </select>
-            <select Npx;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()"></select>
+            <select id="rp-month-y" style="padding:10px;border:2px solid #86efac;border-radius:8px;font-size:16px;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()"></select>
           </div>
           <input type="hidden" id="rp-month"/>
         </div>
