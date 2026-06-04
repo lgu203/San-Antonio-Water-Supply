@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>San Antonio Water Supply — Collector</title>
 <link rel="stylesheet" href="account.css">
+<style>
+  .month-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .month-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:20px; font-size:15px; font-weight:600;
+    border:2px solid #e2e8f0; background:white; color:#4a5568;
+    cursor:pointer; user-select:none; transition:all .15s;
+  }
+  .month-chip input { display:none; }
+  .month-chip.checked { background:#1a56db; border-color:#1a56db; color:white; }
+  .month-chip:hover { border-color:#1a56db; }
+  .chips-label { font-size:13px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:.7px; margin-bottom:8px; }
+</style>
 </head>
 <body>
 
@@ -63,7 +76,7 @@
 </div>
 
 <!-- Account Detail Modal — read only, no payment input -->
-<div id="modal-overlay" onclick="closeModal(event)">
+<div id="modal-overlay" style="display:none">
   <div id="modal">
     <div class="modal-header">
       <div>
@@ -75,15 +88,16 @@
     <div class="modal-meta">
       <div class="meta-item"><label>Barangay</label><p id="modal-brgy"></p></div>
       <div class="meta-item"><label>Purok</label><p id="modal-purk"></p></div>
-      <div class="meta-item"><label>Total Billed</label><p id="modal-grand"></p></div>
+      <div class="meta-item"><label>Total Bill</label><p id="modal-grand"></p></div>
+      <div class="meta-item" id="modal-inst-wrap" style="display:none"><label>Installment</label><p id="modal-inst" class="meta-balance"></p></div>
       <div class="meta-item"><label>Balance</label><p id="modal-balance" class="meta-balance"></p></div>
     </div>
     <div class="modal-body">
-      <h4>Monthly Billing Records</h4>
+      <h4 style="margin-bottom:12px">Monthly Billing Records</h4>
       <div style="overflow-x:auto">
         <table>
           <thead>
-            <tr><th>Month</th><th>Reading</th><th>Basic Amt</th><th>Env. Fee</th><th>Total Bill</th><th>Remaining</th></tr>
+            <tr><th style="width:36px"></th><th>Month</th><th>Reading</th><th>Basic Amt</th><th>Env. Fee</th><th>Total Bill</th></tr>
           </thead>
           <tbody id="modal-table-body"></tbody>
           <tfoot id="modal-table-foot"></tfoot>
