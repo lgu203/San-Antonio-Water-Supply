@@ -6,39 +6,39 @@
 <title>San Antonio Water Supply — Admin</title>
 <link rel="stylesheet" href="account.css">
 <style>
-  .header-title p { color: rgba(255,255,255,.7); font-size: 15px; margin-top: 2px; }
-  .admin-badge { background: #f59e0b; color: #1a202c; font-size: 13px; font-weight: 800;
+  .header-title p { color: rgba(255,255,255,.7); font-size: 11px; margin-top: 1px; }
+  .admin-badge { background: #f59e0b; color: #1a202c; font-size: 10px; font-weight: 800;
     padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; letter-spacing: .5px; }
 
   .modal-action-btn {
     background: rgba(255,255,255,.15); color: white;
     border: 1px solid rgba(255,255,255,.35); border-radius: 7px;
-    padding: 5px 11px; font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 9px 16px; font-size: 16px; font-weight: 600; cursor: pointer;
     white-space: nowrap; font-family: inherit; transition: background .15s;
   }
   .modal-action-btn:hover { background: rgba(255,255,255,.28); }
 
   /* ── READING PANEL (inside 2nd modal) ── */
   #reading-modal-overlay.active { display: flex !important; }
-  .btn-green { background:#16a34a;color:white;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap }
+  .btn-green { background:#16a34a;color:white;border:none;border-radius:8px;padding:12px 20px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap }
   .btn-green:hover { background:#15803d }
-  .btn-cancel-rp { background:none;border:2px solid #d1d5db;color:#6b7280;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit }
+  .btn-cancel-rp { background:none;border:2px solid #d1d5db;color:#6b7280;border-radius:8px;padding:12px 20px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit }
   .btn-cancel-rp:hover { background:#f3f4f6 }
   .rp-form-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:12px }
-  .rp-field label { display:block;font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px }
-  .rp-field input,.rp-field select { width:100%;padding:9px 12px;border:2px solid #86efac;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;color:#1a202c }
+  .rp-field label { display:block;font-size:15px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px }
+  .rp-field input,.rp-field select { width:100%;padding:12px 14px;border:2px solid #86efac;border-radius:8px;font-size:17px;font-family:inherit;outline:none;background:white;color:#1a202c }
   .rp-field input:focus,.rp-field select:focus { border-color:#16a34a }
   .rp-field input[readonly] { background:#f0fdf4;color:#166534;font-weight:700 }
   .preview-grid { display:flex;gap:20px;flex-wrap:wrap }
-  .preview-item label { font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px }
-  .preview-item p { font-size:16px;font-weight:800;color:#14532d;margin-top:2px }
-  .preview-item p.big { font-size:22px;color:#16a34a }
+  .preview-item label { font-size:13px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.5px }
+  .preview-item p { font-size:18px;font-weight:800;color:#14532d;margin-top:2px }
+  .preview-item p.big { font-size:26px;color:#16a34a }
   .rp-actions { display:flex;gap:8px;flex-wrap:wrap;align-items:center }
-  .rdg-hist-item { display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid #d1fae5;border-radius:8px;padding:10px 14px;margin-bottom:6px;font-size:13px }
+  .rdg-hist-item { display:flex;justify-content:space-between;align-items:center;background:white;border:1px solid #d1fae5;border-radius:8px;padding:13px 16px;margin-bottom:8px;font-size:16px }
   .rdg-hist-main { font-weight:700;color:#14532d }
-  .rdg-hist-sub { font-size:11px;color:#6b7280;margin-top:2px }
-  .rdg-hist-bill { font-weight:800;color:#16a34a;font-size:15px }
-  .btn-del-rdg { background:none;border:1px solid #fca5a5;color:#dc2626;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;cursor:pointer }
+  .rdg-hist-sub { font-size:14px;color:#6b7280;margin-top:2px }
+  .rdg-hist-bill { font-weight:800;color:#16a34a;font-size:18px }
+  .btn-del-rdg { background:none;border:1px solid #fca5a5;color:#dc2626;font-size:14px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer }
   .btn-del-rdg:hover { background:#fee2e2 }
 </style>
 </head>
@@ -230,35 +230,35 @@
 
 <!-- ── READING ENTRY MODAL (2nd modal) ── -->
 <div id="reading-modal-overlay" onclick="closeReadingModal(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:flex-start;justify-content:center;padding:20px 14px;overflow-y:auto">
-  <div id="reading-modal" style="background:white;border-radius:14px;width:100%;max-width:640px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;margin:auto">
-    <div style="background:#16a34a;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+  <div id="reading-modal" style="background:white;border-radius:14px;width:100%;max-width:860px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;margin:auto">
+    <div style="background:#16a34a;padding:20px 28px;display:flex;justify-content:space-between;align-items:center">
       <div>
-        <h3 style="color:white;font-size:16px;font-weight:700">📥 Enter Meter Reading</h3>
-        <span id="rdg-modal-acct-badge" style="background:rgba(255,255,255,.2);color:white;font-size:11px;padding:2px 9px;border-radius:20px;margin-top:4px;display:inline-block"></span>
+        <h3 style="color:white;font-size:22px;font-weight:700">📥 Enter Meter Reading</h3>
+        <span id="rdg-modal-acct-badge" style="background:rgba(255,255,255,.2);color:white;font-size:15px;padding:4px 12px;border-radius:20px;margin-top:4px;display:inline-block"></span>
       </div>
-      <button onclick="closeReadingModal()" style="background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#x2715;</button>
+      <button onclick="closeReadingModal()" style="background:rgba(255,255,255,.2);border:none;color:white;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">&#x2715;</button>
     </div>
 
     <!-- Account info strip -->
-    <div style="background:#f0fdf4;border-bottom:2px solid #86efac;padding:12px 20px">
-      <div id="rdg-modal-acct-name" style="font-size:15px;font-weight:700;color:#14532d"></div>
-      <div id="rdg-modal-acct-meta" style="font-size:12px;color:#4b5563;margin-top:2px"></div>
-      <div id="rdg-modal-last" style="margin-top:8px;background:#dcfce7;border-radius:7px;padding:8px 12px;font-size:13px;color:#14532d"></div>
+    <div style="background:#f0fdf4;border-bottom:2px solid #86efac;padding:16px 28px">
+      <div id="rdg-modal-acct-name" style="font-size:19px;font-weight:700;color:#14532d"></div>
+      <div id="rdg-modal-acct-meta" style="font-size:15px;color:#4b5563;margin-top:2px"></div>
+      <div id="rdg-modal-last" style="margin-top:10px;background:#dcfce7;border-radius:7px;padding:10px 14px;font-size:16px;color:#14532d"></div>
     </div>
 
     <!-- Entry form -->
-    <div style="padding:18px 20px">
+    <div style="padding:22px 28px">
       <div class="rp-form-grid">
         <div class="rp-field">
           <label>Month</label>
           <div style="display:flex;gap:6px">
-            <select id="rp-month-m" style="flex:1;padding:9px 8px;border:2px solid #86efac;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()">
+            <select Npx;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()">
               <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option>
               <option value="Apr">April</option><option value="May">May</option><option value="Jun">June</option>
               <option value="Jul">July</option><option value="Aug">August</option><option value="Sep">September</option>
               <option value="Oct">October</option><option value="Nov">November</option><option value="Dec">December</option>
             </select>
-            <select id="rp-month-y" style="width:88px;padding:9px 8px;border:2px solid #86efac;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()"></select>
+            <select Npx;font-family:inherit;outline:none;background:white;color:#1a202c" onchange="rpSyncMonthLabel()"></select>
           </div>
           <input type="hidden" id="rp-month"/>
         </div>
@@ -282,7 +282,7 @@
 
       <!-- Bill Preview -->
       <div id="rp-preview" style="display:none;background:white;border:2px solid #16a34a;border-radius:10px;padding:14px 16px;margin-bottom:12px">
-        <h4 style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">📊 Computed Bill Preview</h4>
+        <h4 style="font-size:14px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">📊 Computed Bill Preview</h4>
         <div class="preview-grid">
           <div class="preview-item"><label>Consumption</label><p id="prev-consumption">—</p></div>
           <div class="preview-item"><label>Basic Amount</label><p id="prev-basic">—</p></div>
@@ -299,7 +299,7 @@
 
       <!-- Reading history in 2nd modal -->
       <div id="rp-history" style="display:none;margin-top:16px">
-        <h4 style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Recent Readings (this account)</h4>
+        <h4 style="font-size:14px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Recent Readings (this account)</h4>
         <div id="rp-history-list"></div>
       </div>
     </div>
