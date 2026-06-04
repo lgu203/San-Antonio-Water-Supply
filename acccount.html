@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>San Antonio Water Supply — Collector</title>
+<link rel="stylesheet" href="account.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1a56db" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8 2 3 8 3 13a9 9 0 0 0 18 0c0-5-5-11-9-11z"/>
+      <path d="M9 16c.5 1.5 1.5 2 3 2s2.5-.5 3-2"/>
+    </svg>
+  </div>
+  <div class="header-title">
+    <h1>San Antonio Water Supply</h1>
+    <p>Collector View — Unpaid Accounts</p>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="sync-pill">
+        <div class="sync-dot waiting" id="sync-dot"></div>
+        <span class="sync-text" id="sync-text">Checking...</span>
+      </div>
+      <button class="hbtn" onclick="showSetup()">⚙️ Setup</button>
+    </div>
+    <div class="sync-sub" id="sync-sub"></div>
+  </div>
+</header>
+
+<div id="setup-banner">
+  <h3>⚙️ Connect to Google Drive</h3>
+  <p>Paste the Web App URL from your Google Apps Script deployment below.</p>
+  <div class="setup-row">
+    <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/XXXXXXX/exec"/>
+    <button class="btn-amber" onclick="saveScriptUrl()">Save &amp; Sync</button>
+  </div>
+</div>
+
+<div id="status-bar"></div>
+
+<div class="main">
+  <div class="search-section">
+    <h2>Search Account</h2>
+    <p id="record-count">Waiting for data...</p>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Account number or name..." autocomplete="off"/>
+      <button onclick="doSearch()">Search</button>
+    </div>
+  </div>
+  <div id="results">
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <h3>No data yet</h3>
+      <p>Tap <strong>⚙️ Setup</strong> to connect to Google Drive.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Account Detail Modal — read only, no payment input -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-name"></h3>
+        <span class="acct-badge" id="modal-acct"></span>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">&#x2715;</button>
+    </div>
+    <div class="modal-meta">
+      <div class="meta-item"><label>Barangay</label><p id="modal-brgy"></p></div>
+      <div class="meta-item"><label>Purok</label><p id="modal-purk"></p></div>
+      <div class="meta-item"><label>Total Billed</label><p id="modal-grand"></p></div>
+      <div class="meta-item"><label>Total Paid</label><p id="modal-paid" class="meta-paid"></p></div>
+      <div class="meta-item"><label>Balance</label><p id="modal-balance" class="meta-balance"></p></div>
+    </div>
+    <div class="modal-body">
+      <h4>Monthly Billing Records</h4>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>Month</th><th>Reading</th><th>Basic Amt</th><th>Env. Fee</th><th>Total Bill</th><th>Paid</th><th>Remaining</th></tr>
+          </thead>
+          <tbody id="modal-table-body"></tbody>
+          <tfoot id="modal-table-foot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORTANT: shared.js must come FIRST — provides computeBill, calcMonthBalances, etc. -->
+<!-- DO NOT load account.js here — it is an old duplicate of shared.js -->
+<script src="shared.js"></script>
+<script src="collector.js"></script>
+</body>
+</html>
