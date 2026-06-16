@@ -173,3 +173,23 @@ function formatDate(d) {
          d.toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit' });
 }
 function getScriptUrl() { return localStorage.getItem('acct_script_url') || ''; }
+// ── QUOTA GUARD — huwag mag-fetch kung hindi pa lumipas ang minimum interval ──
+const FETCH_MIN_INTERVAL = {
+  data:     5 * 60 * 1000,  // data (Excel rows) — 5 minuto
+  payments: 2 * 60 * 1000,  // payments — 2 minuto
+  tariff:   60 * 60 * 1000, // tariff — 1 oras
+  readings: 5 * 60 * 1000   // readings — 5 minuto
+};
+
+function canFetch(action) {
+  const key  = 'acct_last_fetch_' + action;
+  const last = parseInt(localStorage.getItem(key) || '0', 10);
+  const now  = Date.now();
+  if (now - last < (FETCH_MIN_INTERVAL[action] || 60000)) return false;
+  localStorage.setItem(key, String(now));
+  return true;
+}
+
+function forceFetch(action) {
+  localStorage.setItem('acct_last_fetch_' + action, '0');
+}
