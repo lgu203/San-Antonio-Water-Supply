@@ -111,5 +111,17 @@
 <!-- DO NOT load account.js here — it is an old duplicate of shared.js -->
 <script src="shared.js"></script>
 <script src="collector.js"></script>
+
+<!-- ── SERVICE WORKER REGISTRATION — para gumana offline ── -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
