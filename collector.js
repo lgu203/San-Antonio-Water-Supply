@@ -33,8 +33,8 @@ let _lastReadingsCache = '';
       });
     }
   } catch (e) {}
-  if (document.readyState === 'complete') { attemptSync(); startSyncTimer(); }
-  else window.addEventListener('load', () => { attemptSync(); startSyncTimer(); });
+  if (document.readyState === 'complete') { setTimeout(attemptSync, 300); startSyncTimer(); }
+  else window.addEventListener('load', () => { setTimeout(attemptSync, 300); startSyncTimer(); });
 })();
 
 function initData(data) {
@@ -78,18 +78,28 @@ function attemptSync() {
     document.getElementById('sync-sub').textContent = 'Tap Setup to connect to Google Drive';
     return;
   }
-  if (!navigator.onLine) { setSyncStatus('offline', 'No internet'); updateSyncSub(); return; }
+  // Check online status — navigator.onLine can be unreliable on tablets
+  // so we check it but also handle fetch failure gracefully
+  if (!navigator.onLine) {
+    setSyncStatus('offline', 'No internet');
+    updateSyncSub();
+    return;
+  }
   doSync(url);
 }
 
 function doSync(url) {
   setSyncStatus('syncing', 'Syncing...');
 
-  // Fetch each independently — one failure won't break the others
-  const fetchJSON = (endpoint) =>
-    fetch(url + endpoint, { cache: 'no-store', redirect: 'follow' })
-      .then(r => r.json())
-      .catch(() => ({ error: 'fetch failed' }));
+  // Fetch each independently with 10-second timeout
+  // so the UI never hangs even with no actual internet connection
+  const fetchJSON = (endpoint) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+    return fetch(url + endpoint, { cache: 'no-store', redirect: 'follow', signal: controller.signal })
+      .then(r => { clearTimeout(timer); return r.json(); })
+      .catch(() => { clearTimeout(timer); return { error: 'fetch failed' }; });
+  };
 
   Promise.all([
     fetchJSON('?action=data'),
@@ -160,10 +170,11 @@ function doSync(url) {
       const local = localStorage.getItem('acct_payments_cache');
       PAYMENTS = local ? JSON.parse(local) : {};
     } catch(e) { PAYMENTS = {}; }
-    setSyncStatus('offline', 'Sync failed');
+    // If fetch failed, likely no real internet despite navigator.onLine saying true
+    setSyncStatus('offline', navigator.onLine ? 'Sync failed' : 'No internet');
     updateSyncSub();
-    showStatus('Could not reach server: ' + err.message, 'error', 5000);
-    doSearch();
+    showStatus(navigator.onLine ? 'Could not reach server.' : 'No internet connection.', 'warning', 4000);
+    doSearch(); // always allow search even after sync failure
   });
 }
 
