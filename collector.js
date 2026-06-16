@@ -3,7 +3,7 @@ let ACCOUNTS   = [];
 let accountMap = {};
 let PAYMENTS   = {}; // { acctNum: totalPaid }
 let syncTimer  = null;
-const SYNC_INTERVAL = 30 * 1000; // 30 seconds — para ma-reflect agad ang payments mula sa ibang device
+const SYNC_INTERVAL = 5 * 60 * 1000; // 5 minuto — para hindi maubos ang Drive quota
 let _lastReadingsCache = '';
 
 // ── BOOTSTRAP ─────────────────────────────────────────────────────
@@ -33,8 +33,8 @@ let _lastReadingsCache = '';
       });
     }
   } catch (e) {}
-  if (document.readyState === 'complete') { setTimeout(attemptSync, 300); startSyncTimer(); }
-  else window.addEventListener('load', () => { setTimeout(attemptSync, 300); startSyncTimer(); });
+  if (document.readyState === 'complete') { attemptSync(); startSyncTimer(); }
+  else window.addEventListener('load', () => { attemptSync(); startSyncTimer(); });
 })();
 
 function initData(data) {
@@ -78,38 +78,33 @@ function attemptSync() {
     document.getElementById('sync-sub').textContent = 'Tap Setup to connect to Google Drive';
     return;
   }
-  // Check online status — navigator.onLine can be unreliable on tablets
-  // so we check it but also handle fetch failure gracefully
-  if (!navigator.onLine) {
-    setSyncStatus('offline', 'No internet');
-    updateSyncSub();
-    return;
-  }
-  doSync(url);
+  if (!navigator.onLine) { setSyncStatus('offline', 'No internet'); updateSyncSub(); return; }
+  doSync(url, false);
 }
 
-function doSync(url) {
+function doSync(url, force) {
   setSyncStatus('syncing', 'Syncing...');
 
-  // Fetch each independently with 10-second timeout
-  // so the UI never hangs even with no actual internet connection
-  const fetchJSON = (endpoint) => {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10000);
-    return fetch(url + endpoint, { cache: 'no-store', redirect: 'follow', signal: controller.signal })
-      .then(r => { clearTimeout(timer); return r.json(); })
-      .catch(() => { clearTimeout(timer); return { error: 'fetch failed' }; });
+  // Kung force (manual sync), i-reset ang lahat ng timers
+  if (force) { ['data','payments','tariff','readings'].forEach(forceFetch); }
+
+  const fetchJSON = (action) => {
+    // Kung hindi pa time para mag-fetch, ibalik ang cached/empty result agad
+    if (!canFetch(action)) return Promise.resolve({ _skipped: true });
+    return fetch(url + '?action=' + action, { cache: 'no-store', redirect: 'follow' })
+      .then(r => r.json())
+      .catch(() => ({ error: 'fetch failed' }));
   };
 
   Promise.all([
-    fetchJSON('?action=data'),
-    fetchJSON('?action=payments'),
-    fetchJSON('?action=tariff'),
-    fetchJSON('?action=readings')
+    fetchJSON('data'),
+    fetchJSON('payments'),
+    fetchJSON('tariff'),
+    fetchJSON('readings')
   ])
   .then(([data, payData, tariffData, rdgData]) => {
     // Process billing rows
-    if (!data.error && data.rows && data.rows.length) {
+    if (!data._skipped && !data.error && data.rows && data.rows.length) {
       const newMap = parseRows(data.rows);
       overwriteData(newMap, ACCOUNTS, accountMap);
       saveLocal();
@@ -121,14 +116,14 @@ function doSync(url) {
     }
 
     // Process payments from server — only overwrite local if server has data
-    if (!payData.error && payData.payments && payData.payments.length > 0) {
+    if (!payData._skipped && !payData.error && payData.payments && payData.payments.length > 0) {
       PAYMENTS = {};
       payData.payments.forEach(p => {
         const n = String(p.accountNumber);
         PAYMENTS[n] = (PAYMENTS[n] || 0) + Number(p.amount);
       });
       try { localStorage.setItem('acct_payments_cache', JSON.stringify(PAYMENTS)); } catch (e) {}
-    } else {
+    } else if (!payData._skipped) {
       // Server has no payments — always use local admin-saved cache
       try {
         const local = localStorage.getItem('acct_payments_cache');
@@ -137,14 +132,13 @@ function doSync(url) {
     }
 
     // Process tariff
-    if (!tariffData.error && tariffData.rates) applyTariff(tariffData.rates);
+    if (!tariffData._skipped && !tariffData.error && tariffData.rates) applyTariff(tariffData.rates);
 
     // Process manually entered readings — inject into account data
-    if (!rdgData.error && rdgData.readings && rdgData.readings.length) {
+    if (!rdgData._skipped && !rdgData.error && rdgData.readings && rdgData.readings.length) {
       for (const r of rdgData.readings) {
         const acct = accountMap[String(r.accountNumber)];
         if (!acct) continue;
-        // Skip if this month already exists from Excel data
         const alreadyHas = acct.months.some(m => m.month === r.month);
         if (alreadyHas) continue;
         const bill = computeBill(r.consumption, r.type);
@@ -170,11 +164,10 @@ function doSync(url) {
       const local = localStorage.getItem('acct_payments_cache');
       PAYMENTS = local ? JSON.parse(local) : {};
     } catch(e) { PAYMENTS = {}; }
-    // If fetch failed, likely no real internet despite navigator.onLine saying true
-    setSyncStatus('offline', navigator.onLine ? 'Sync failed' : 'No internet');
+    setSyncStatus('offline', 'Sync failed');
     updateSyncSub();
-    showStatus(navigator.onLine ? 'Could not reach server.' : 'No internet connection.', 'warning', 4000);
-    doSearch(); // always allow search even after sync failure
+    showStatus('Could not reach server: ' + err.message, 'error', 5000);
+    doSearch();
   });
 }
 
@@ -203,8 +196,9 @@ function saveScriptUrl() {
     alert('Invalid URL. Must start with https://script.google.com'); return;
   }
   localStorage.setItem('acct_script_url', url);
+  ['data','payments','tariff','readings'].forEach(forceFetch);
   document.getElementById('setup-banner').style.display = 'none';
-  attemptSync();
+  doSync(url, true);
 }
 
 // ── STORAGE EVENT — auto-refresh when admin saves payments (cross-tab) ─────────
